@@ -1,0 +1,12 @@
+{
+  "definitions": {
+    "c": {
+      "type": "object",
+      "properties": {
+        "b": {
+          "$ref": "loop1.schema.json#/definitions/b"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "title": "Loop",
+  "properties": {
+    "a": {
+      "$ref": "#/definitions/b"
+    }
+  },
+  "definitions": {
+    "b": {
+      "type": "object",
+      "properties": {
+        "c": {
+          "$ref": "loop2.schema.json#/definitions/c"
+        }
+      }
+    }
+  }
+}

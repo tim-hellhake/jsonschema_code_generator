@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "title": "Twice",
+  "properties": {
+    "a": {
+      "$ref": "#/definitions/c"
+    },
+    "b": {
+      "$ref": "#/definitions/c"
+    }
+  },
+  "definitions": {
+    "c": {
+      "type": "object",
+      "title": "c",
+      "properties": {
+        "foo": {}
+      }
+    }
+  }
+}

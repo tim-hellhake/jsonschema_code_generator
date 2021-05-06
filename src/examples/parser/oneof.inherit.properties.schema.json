@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "title": "Root title",
+  "required": [
+    "property"
+  ],
+  "enum": [
+    "a",
+    "b",
+    "c"
+  ],
+  "constant": "42",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "property": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "type": "string"
+    }
+  ]
+}

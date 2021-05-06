@@ -1,0 +1,18 @@
+[package]
+name = "jsonschema_code_generator"
+version = "0.1.0"
+authors = ["Tim Hellhake"]
+edition = "2018"
+description = "Crate for generating rust types from JSON schemas"
+documentation = "https://docs.rs/jsonschema_code_generator"
+readme = "README.md"
+repository = "https://github.com/tim-hellhake/jsonschema_code_generator"
+license = "MPL-2.0"
+keywords = ["json", "schema", "code", "generator"]
+
+[dependencies]
+serde = "1.0.125"
+serde_repr = "0.1.6"
+serde_derive = "1.0.125"
+serde_json = "1.0.64"
+convert_case = "0.4.0"

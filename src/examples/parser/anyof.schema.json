@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "properties": {
+        "alias": {
+          "type": "string"
+        }
+      }
+    }
+  ]
+}

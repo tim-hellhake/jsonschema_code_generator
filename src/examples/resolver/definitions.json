@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "title": "r00t",
+  "properties": {
+    "foo": {
+      "type": "string"
+    }
+  },
+  "definitions": {
+    "foo": {
+      "type": "integer"
+    }
+  }
+}

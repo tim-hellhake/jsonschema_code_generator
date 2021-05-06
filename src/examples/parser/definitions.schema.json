@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "properties": {
+    "property": {
+      "$ref": "#/definitions/referenced"
+    }
+  },
+  "definitions": {
+    "referenced": {
+      "type": "object",
+      "properties": {
+        "property": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
