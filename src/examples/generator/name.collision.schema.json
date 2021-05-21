@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "title": "Collision",
+  "properties": {
+    "a": {
+      "type": "object",
+      "properties": {
+        "foo": {}
+      }
+    },
+    "b": {
+      "type": "object",
+      "title": "a",
+      "properties": {
+        "foo": {}
+      }
+    },
+    "c": {
+      "type": "object",
+      "title": "a",
+      "properties": {
+        "foo": {}
+      }
+    }
+  }
+}

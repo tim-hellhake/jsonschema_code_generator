@@ -148,7 +148,7 @@ impl Generator {
                 None => {
                     let position = self.next_position;
                     self.next_position += 1;
-                    let name = sanitize_struct_name(name.clone());
+                    let name = self.get_collision_free_name(sanitize_struct_name(name.clone()));
                     self.known_type_names.insert(src.clone(), name.clone());
                     visited_objects.push(src.clone());
 
@@ -186,6 +186,18 @@ impl Generator {
             true => format!("Box<{}>", name),
             false => name,
         }
+    }
+
+    fn get_collision_free_name(&self, name: String) -> String {
+        let mut counter = 1;
+        let mut new_name = name.clone();
+
+        while self.known_type_names.values().any(|val| val == &new_name) {
+            new_name = format!("{}{}", name, counter);
+            counter += 1;
+        }
+
+        new_name
     }
 
     fn create_property(
@@ -933,6 +945,78 @@ mod generator_tests {
                 Type {
                     src: String::from(format!("{}#/definitions/c", file)),
                     name: String::from("C"),
+                    properties: vec![Property {
+                        name: String::from("foo"),
+                        serde_options: SerdeOptions { rename: None },
+                        property_type: String::from("Value")
+                    }]
+                }
+            ]
+        );
+    }
+
+    #[test]
+    fn should_prevent_name_collisions() {
+        let file = "src/examples/generator/name.collision.schema.json";
+
+        let mut generator = Generator::new();
+        generator.add_file(Path::new(file));
+
+        let mut types: Vec<EntryWithPosition<Type>> = generator
+            .types
+            .into_iter()
+            .map(|(_, value)| value)
+            .collect();
+
+        types.sort();
+
+        let types: Vec<Type> = types.into_iter().map(|x| x.payload).collect();
+
+        assert_eq!(
+            types,
+            vec![
+                Type {
+                    src: String::from(file),
+                    name: String::from("Collision"),
+                    properties: vec![
+                        Property {
+                            name: String::from("a"),
+                            serde_options: SerdeOptions { rename: None },
+                            property_type: String::from("Option<A>")
+                        },
+                        Property {
+                            name: String::from("b"),
+                            serde_options: SerdeOptions { rename: None },
+                            property_type: String::from("Option<A1>")
+                        },
+                        Property {
+                            name: String::from("c"),
+                            serde_options: SerdeOptions { rename: None },
+                            property_type: String::from("Option<A2>")
+                        }
+                    ]
+                },
+                Type {
+                    src: String::from(format!("{}/properties/a", file)),
+                    name: String::from("A"),
+                    properties: vec![Property {
+                        name: String::from("foo"),
+                        serde_options: SerdeOptions { rename: None },
+                        property_type: String::from("Value")
+                    }]
+                },
+                Type {
+                    src: String::from(format!("{}/properties/b", file)),
+                    name: String::from("A1"),
+                    properties: vec![Property {
+                        name: String::from("foo"),
+                        serde_options: SerdeOptions { rename: None },
+                        property_type: String::from("Value")
+                    }]
+                },
+                Type {
+                    src: String::from(format!("{}/properties/c", file)),
+                    name: String::from("A2"),
                     properties: vec![Property {
                         name: String::from("foo"),
                         serde_options: SerdeOptions { rename: None },

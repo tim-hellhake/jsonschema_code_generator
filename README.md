@@ -23,7 +23,7 @@ fn main() {
 # Todo
 - [x] Add support for draft 4 schemas
 - [x] Resolve definitions across files
-- [ ] Resolve struct name collisions
+- [x] Resolve struct name collisions
 - [ ] Add macro
 - [ ] Merge `anyOf` and `allOf` definitions to a single type
 - [ ] Add support for draft 7 schemas
