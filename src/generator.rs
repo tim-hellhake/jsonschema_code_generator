@@ -47,7 +47,7 @@ impl Type {
         result.push_str(&format!("struct {} {{\n", self.name));
 
         let properties: Vec<String> = self.properties.iter().map(|x| x.serialize()).collect();
-        result.push_str(&properties.join("\n"));
+        result.push_str(&properties.join(""));
 
         result.push_str("}");
 
@@ -332,8 +332,8 @@ impl Generator {
     pub fn serialize(&self) -> String {
         let mut result = String::from("");
 
-        result.push_str("use serde_json::Value;\n\n");
-        result.push_str("use std::collections::BTreeMap;\n\n");
+        result.push_str("use serde_json::Value;\n");
+        result.push_str("use std::collections::BTreeMap;\n");
 
         let mut types: Vec<&EntryWithPosition<Type>> = self.types.values().collect();
         types.sort();
