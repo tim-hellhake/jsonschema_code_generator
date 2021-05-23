@@ -1,6 +1,6 @@
 use serde_json::Value;
 use std::collections::BTreeMap;
-// from schemas/draft-04.json
+#[doc = "Generated from schemas/draft-04.json"]
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 struct Unknown {
     #[serde(rename = "$schema")]

@@ -42,7 +42,7 @@ impl Type {
     pub fn serialize(&self) -> String {
         let mut result = String::from("");
 
-        result.push_str(&format!("// from {}\n", self.src));
+        result.push_str(&format!("#[doc = \"Generated from {}\"]\n", self.src));
         result.push_str("#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]\n");
         result.push_str(&format!("struct {} {{\n", self.name));
 
