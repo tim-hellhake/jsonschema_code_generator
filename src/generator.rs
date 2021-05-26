@@ -32,13 +32,13 @@ impl<T: Eq> PartialOrd for EntryWithPosition<T> {
 }
 
 #[derive(Eq, PartialEq, Debug)]
-struct Type {
+struct GeneratedType {
     src: String,
     name: String,
-    properties: Vec<Property>,
+    properties: Vec<GeneratedProperty>,
 }
 
-impl Type {
+impl GeneratedType {
     pub fn serialize(&self) -> String {
         let mut result = String::from("");
 
@@ -56,13 +56,13 @@ impl Type {
 }
 
 #[derive(Eq, PartialEq, Debug)]
-struct Property {
+struct GeneratedProperty {
     name: String,
     property_type: String,
     serde_options: SerdeOptions,
 }
 
-impl Property {
+impl GeneratedProperty {
     pub fn serialize(&self) -> String {
         let mut result = String::from("");
 
@@ -86,7 +86,7 @@ struct SerdeOptions {
 
 pub struct Generator {
     resolver: Resolver,
-    types: HashMap<String, EntryWithPosition<Type>>,
+    types: HashMap<String, EntryWithPosition<GeneratedType>>,
     next_position: u64,
     known_type_names: HashMap<String, String>,
 }
@@ -163,7 +163,7 @@ impl Generator {
                         ));
                     }
 
-                    let new_type = Type {
+                    let new_type = GeneratedType {
                         src: src.clone(),
                         name: name.clone(),
                         properties: new_properties,
@@ -210,7 +210,7 @@ impl Generator {
             data_type,
         }: &ObjectProperty,
         visited_objects: Vec<String>,
-    ) -> Property {
+    ) -> GeneratedProperty {
         let property_name = sanitize_property_name(name.clone());
 
         let rename = if name == &property_name {
@@ -219,7 +219,7 @@ impl Generator {
             Some(name.clone())
         };
 
-        Property {
+        GeneratedProperty {
             name: property_name,
             property_type: self.add_type(
                 base_path,
@@ -335,7 +335,7 @@ impl Generator {
         result.push_str("use serde_json::Value;\n");
         result.push_str("use std::collections::BTreeMap;\n");
 
-        let mut types: Vec<&EntryWithPosition<Type>> = self.types.values().collect();
+        let mut types: Vec<&EntryWithPosition<GeneratedType>> = self.types.values().collect();
         types.sort();
         let types: Vec<String> = types.into_iter().map(|x| x.payload.serialize()).collect();
         result.push_str(&types.join("\n\n"));
@@ -347,7 +347,9 @@ impl Generator {
 
 #[cfg(test)]
 mod generator_tests {
-    use crate::generator::{EntryWithPosition, Generator, Property, SerdeOptions, Type};
+    use crate::generator::{
+        EntryWithPosition, GeneratedProperty, GeneratedType, Generator, SerdeOptions,
+    };
     use crate::parser::{
         AllOf, AnyOf, DataType, Object, ObjectProperty, OneOf, PrimitiveType, Ref, Root,
     };
@@ -395,7 +397,7 @@ mod generator_tests {
 
     #[test]
     fn should_serialize_type_with_derive() {
-        let t = Type {
+        let t = GeneratedType {
             src: String::from(""),
             name: String::from(""),
             properties: Vec::new(),
@@ -410,7 +412,7 @@ mod generator_tests {
 
     #[test]
     fn should_serialize_type_with_src() {
-        let t = Type {
+        let t = GeneratedType {
             src: String::from("foo"),
             name: String::from(""),
             properties: Vec::new(),
@@ -421,7 +423,7 @@ mod generator_tests {
 
     #[test]
     fn should_serialize_type_with_struct() {
-        let t = Type {
+        let t = GeneratedType {
             src: String::from(""),
             name: String::from("Foo"),
             properties: Vec::new(),
@@ -432,10 +434,10 @@ mod generator_tests {
 
     #[test]
     fn should_serialize_type_with_properties() {
-        let t = Type {
+        let t = GeneratedType {
             src: String::from(""),
             name: String::from(""),
-            properties: vec![Property {
+            properties: vec![GeneratedProperty {
                 name: String::from("foo"),
                 property_type: String::from("Obsidian"),
                 serde_options: SerdeOptions { rename: None },
@@ -447,7 +449,7 @@ mod generator_tests {
 
     #[test]
     fn should_serialize_property_with_name() {
-        let property = Property {
+        let property = GeneratedProperty {
             name: String::from("foo"),
             property_type: String::from("Obsidian"),
             serde_options: SerdeOptions { rename: None },
@@ -458,7 +460,7 @@ mod generator_tests {
 
     #[test]
     fn should_serialize_property_with_rename() {
-        let property = Property {
+        let property = GeneratedProperty {
             name: String::from(""),
             property_type: String::from(""),
             serde_options: SerdeOptions {
@@ -506,10 +508,10 @@ mod generator_tests {
             generator.types.get("correct src"),
             Some(&EntryWithPosition {
                 position: 0,
-                payload: Type {
+                payload: GeneratedType {
                     src: String::from("correct src"),
                     name: String::from("AwesomeFoo"),
-                    properties: vec![Property {
+                    properties: vec![GeneratedProperty {
                         name: String::from("awesome_property"),
                         property_type: String::from("Value"),
                         serde_options: SerdeOptions {
@@ -862,7 +864,7 @@ mod generator_tests {
         let mut generator = Generator::new();
         generator.add_file(Path::new(file));
 
-        let mut types: Vec<EntryWithPosition<Type>> = generator
+        let mut types: Vec<EntryWithPosition<GeneratedType>> = generator
             .types
             .into_iter()
             .map(|(_, value)| value)
@@ -870,33 +872,33 @@ mod generator_tests {
 
         types.sort();
 
-        let types: Vec<Type> = types.into_iter().map(|x| x.payload).collect();
+        let types: Vec<GeneratedType> = types.into_iter().map(|x| x.payload).collect();
 
         assert_eq!(
             types,
             vec![
-                Type {
+                GeneratedType {
                     src: String::from("src/examples/generator/loop1.schema.json"),
                     name: String::from("Loop"),
-                    properties: vec![Property {
+                    properties: vec![GeneratedProperty {
                         name: String::from("a"),
                         serde_options: SerdeOptions { rename: None },
                         property_type: String::from("Option<B>")
                     }]
                 },
-                Type {
+                GeneratedType {
                     src: String::from("src/examples/generator/loop1.schema.json#/definitions/b"),
                     name: String::from("B"),
-                    properties: vec![Property {
+                    properties: vec![GeneratedProperty {
                         name: String::from("c"),
                         serde_options: SerdeOptions { rename: None },
                         property_type: String::from("Option<C>")
                     }]
                 },
-                Type {
+                GeneratedType {
                     src: String::from("src/examples/generator/loop2.schema.json#/definitions/c"),
                     name: String::from("C"),
-                    properties: vec![Property {
+                    properties: vec![GeneratedProperty {
                         name: String::from("b"),
                         serde_options: SerdeOptions { rename: None },
                         property_type: String::from("Option<Box<B>>")
@@ -913,7 +915,7 @@ mod generator_tests {
         let mut generator = Generator::new();
         generator.add_file(Path::new(file));
 
-        let mut types: Vec<EntryWithPosition<Type>> = generator
+        let mut types: Vec<EntryWithPosition<GeneratedType>> = generator
             .types
             .into_iter()
             .map(|(_, value)| value)
@@ -921,31 +923,31 @@ mod generator_tests {
 
         types.sort();
 
-        let types: Vec<Type> = types.into_iter().map(|x| x.payload).collect();
+        let types: Vec<GeneratedType> = types.into_iter().map(|x| x.payload).collect();
 
         assert_eq!(
             types,
             vec![
-                Type {
+                GeneratedType {
                     src: String::from(file),
                     name: String::from("Twice"),
                     properties: vec![
-                        Property {
+                        GeneratedProperty {
                             name: String::from("a"),
                             serde_options: SerdeOptions { rename: None },
                             property_type: String::from("Option<C>")
                         },
-                        Property {
+                        GeneratedProperty {
                             name: String::from("b"),
                             serde_options: SerdeOptions { rename: None },
                             property_type: String::from("Option<C>")
                         }
                     ]
                 },
-                Type {
+                GeneratedType {
                     src: String::from(format!("{}#/definitions/c", file)),
                     name: String::from("C"),
-                    properties: vec![Property {
+                    properties: vec![GeneratedProperty {
                         name: String::from("foo"),
                         serde_options: SerdeOptions { rename: None },
                         property_type: String::from("Value")
@@ -962,7 +964,7 @@ mod generator_tests {
         let mut generator = Generator::new();
         generator.add_file(Path::new(file));
 
-        let mut types: Vec<EntryWithPosition<Type>> = generator
+        let mut types: Vec<EntryWithPosition<GeneratedType>> = generator
             .types
             .into_iter()
             .map(|(_, value)| value)
@@ -970,54 +972,54 @@ mod generator_tests {
 
         types.sort();
 
-        let types: Vec<Type> = types.into_iter().map(|x| x.payload).collect();
+        let types: Vec<GeneratedType> = types.into_iter().map(|x| x.payload).collect();
 
         assert_eq!(
             types,
             vec![
-                Type {
+                GeneratedType {
                     src: String::from(file),
                     name: String::from("Collision"),
                     properties: vec![
-                        Property {
+                        GeneratedProperty {
                             name: String::from("a"),
                             serde_options: SerdeOptions { rename: None },
                             property_type: String::from("Option<A>")
                         },
-                        Property {
+                        GeneratedProperty {
                             name: String::from("b"),
                             serde_options: SerdeOptions { rename: None },
                             property_type: String::from("Option<A1>")
                         },
-                        Property {
+                        GeneratedProperty {
                             name: String::from("c"),
                             serde_options: SerdeOptions { rename: None },
                             property_type: String::from("Option<A2>")
                         }
                     ]
                 },
-                Type {
+                GeneratedType {
                     src: String::from(format!("{}/properties/a", file)),
                     name: String::from("A"),
-                    properties: vec![Property {
+                    properties: vec![GeneratedProperty {
                         name: String::from("foo"),
                         serde_options: SerdeOptions { rename: None },
                         property_type: String::from("Value")
                     }]
                 },
-                Type {
+                GeneratedType {
                     src: String::from(format!("{}/properties/b", file)),
                     name: String::from("A1"),
-                    properties: vec![Property {
+                    properties: vec![GeneratedProperty {
                         name: String::from("foo"),
                         serde_options: SerdeOptions { rename: None },
                         property_type: String::from("Value")
                     }]
                 },
-                Type {
+                GeneratedType {
                     src: String::from(format!("{}/properties/c", file)),
                     name: String::from("A2"),
-                    properties: vec![Property {
+                    properties: vec![GeneratedProperty {
                         name: String::from("foo"),
                         serde_options: SerdeOptions { rename: None },
                         property_type: String::from("Value")
