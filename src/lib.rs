@@ -9,6 +9,7 @@ use std::path::Path;
 
 use crate::generator::Generator;
 
+mod generated;
 mod generator;
 mod keywords;
 mod parser;
