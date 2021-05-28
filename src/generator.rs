@@ -67,6 +67,7 @@ impl Into<TokenStream> for Generator {
         let tokens: Vec<TokenStream> = types.into_iter().map(|x| x.into()).collect();
 
         quote! {
+            use serde_derive::{Serialize, Deserialize};
             use serde_json::Value;
             use std::collections::BTreeMap;
             #(#tokens)*
