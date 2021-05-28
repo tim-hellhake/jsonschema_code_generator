@@ -2,6 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
+use proc_macro2::{Span, TokenStream};
+use quote::quote;
+
 #[derive(Eq, PartialEq, Debug)]
 pub struct GeneratedType {
     pub src: String,
@@ -9,20 +12,29 @@ pub struct GeneratedType {
     pub properties: Vec<GeneratedProperty>,
 }
 
-impl GeneratedType {
-    pub fn serialize(&self) -> String {
-        let mut result = String::from("");
+impl Into<TokenStream> for GeneratedType {
+    fn into(self) -> TokenStream {
+        let GeneratedType {
+            src,
+            name,
+            properties,
+        } = self;
 
-        result.push_str(&format!("#[doc = \"Generated from {}\"]\n", self.src));
-        result.push_str("#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]\n");
-        result.push_str(&format!("struct {} {{\n", self.name));
+        let properties: Vec<TokenStream> = properties.into_iter().map(|x| x.into()).collect();
 
-        let properties: Vec<String> = self.properties.iter().map(|x| x.serialize()).collect();
-        result.push_str(&properties.join(""));
+        let comment = format!("///Generated from {}", src)
+            .parse::<TokenStream>()
+            .unwrap();
 
-        result.push_str("}");
+        let name = proc_macro2::Ident::new(&name, Span::call_site());
 
-        result
+        quote! {
+            #comment
+            #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
+            struct #name {
+                #(#properties),*
+            }
+        }
     }
 }
 
@@ -33,24 +45,76 @@ pub struct GeneratedProperty {
     pub serde_options: SerdeOptions,
 }
 
-impl GeneratedProperty {
-    pub fn serialize(&self) -> String {
-        let mut result = String::from("");
+impl Into<TokenStream> for GeneratedProperty {
+    fn into(self) -> TokenStream {
+        let GeneratedProperty {
+            name,
+            property_type,
+            serde_options,
+        } = self;
 
-        match &self.serde_options.rename {
-            Some(rename) => {
-                result.push_str(&format!("    #[serde(rename = \"{}\")]\n", rename));
+        let attributes: Vec<TokenStream> = match serde_options.rename {
+            Some(name) => {
+                vec![quote! {
+                    #[serde(rename = #name)]
+                }]
             }
-            None => {}
+            None => Vec::new(),
+        };
+
+        let name = proc_macro2::Ident::new(&name, Span::call_site());
+        let property_type = property_type.parse::<TokenStream>().unwrap();
+
+        quote! {
+            #(#attributes)*
+            pub #name: #property_type
         }
-
-        result.push_str(&format!("    pub {}: {},\n", self.name, self.property_type));
-
-        result
     }
 }
 
 #[derive(Eq, PartialEq, Debug)]
 pub struct SerdeOptions {
     pub rename: Option<String>,
+}
+
+#[cfg(test)]
+mod generated_tests {
+    use crate::generated::{GeneratedProperty, GeneratedType, SerdeOptions};
+    use proc_macro2::TokenStream;
+
+    #[test]
+    fn should_generate_valid_property_rust_code() {
+        let tokens: TokenStream = create_property().into();
+
+        assert_eq!(
+            tokens.to_string(),
+            String::from("# [serde (rename = \"original name\")] pub new_name : String")
+        )
+    }
+
+    #[test]
+    fn should_generate_valid_struct_rust_code() {
+        let struct_type = GeneratedType {
+            src: String::from("nirvana"),
+            name: String::from("new_name"),
+            properties: vec![create_property(), create_property()],
+        };
+
+        let tokens: TokenStream = struct_type.into();
+
+        assert_eq!(
+            tokens.to_string(),
+            String::from("# [doc = \"Generated from nirvana\"] # [derive (Clone , PartialEq , Debug , Deserialize , Serialize)] struct new_name { # [serde (rename = \"original name\")] pub new_name : String , # [serde (rename = \"original name\")] pub new_name : String }")
+        )
+    }
+
+    fn create_property() -> GeneratedProperty {
+        GeneratedProperty {
+            name: String::from("new_name"),
+            property_type: String::from("String"),
+            serde_options: SerdeOptions {
+                rename: Some(String::from("original name")),
+            },
+        }
+    }
 }

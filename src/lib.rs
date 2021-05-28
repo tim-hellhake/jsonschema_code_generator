@@ -8,6 +8,7 @@ extern crate serde_derive;
 use std::path::Path;
 
 use crate::generator::Generator;
+use proc_macro2::TokenStream;
 
 mod generated;
 mod generator;
@@ -21,13 +22,20 @@ mod schema;
 pub fn generate(path: &Path) -> String {
     let mut generator = Generator::new();
     generator.add_file(path);
-    generator.serialize()
+    let tokens: TokenStream = generator.into();
+    tokens.to_string()
 }
 
 #[cfg(test)]
 mod lib_tests {
-    use std::fs;
-    use std::path::Path;
+    use proc_macro2::TokenStream;
+
+    use std::{
+        fs,
+        io::Write,
+        path::Path,
+        process::{Command, Stdio},
+    };
 
     use crate::generator::Generator;
 
@@ -35,9 +43,21 @@ mod lib_tests {
     fn test() {
         let mut generator = Generator::new();
         generator.add_file(Path::new("schemas/draft-04.json"));
-        let actual = generator.serialize();
+        let tokens: TokenStream = generator.into();
+        let actual = tokens.to_string();
         let expected = fs::read_to_string("schemas/draft-04.rs").unwrap();
 
-        assert_eq!(actual, expected);
+        assert_eq!(format(actual), expected);
+    }
+
+    fn format(text: impl std::fmt::Display) -> String {
+        let mut rustfmt = Command::new("rustfmt")
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .spawn()
+            .unwrap();
+        write!(rustfmt.stdin.take().unwrap(), "{}", text).unwrap();
+        let output = rustfmt.wait_with_output().unwrap();
+        String::from_utf8(output.stdout).unwrap()
     }
 }

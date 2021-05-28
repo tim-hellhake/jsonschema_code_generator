@@ -9,6 +9,8 @@ use crate::parser::{
 };
 use crate::resolver::{ResolveResult, Resolver};
 use crate::sanitizer::{sanitize_property_name, sanitize_struct_name};
+use proc_macro2::TokenStream;
+use quote::quote;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::path::Path;
@@ -37,6 +39,39 @@ pub struct Generator {
     types: HashMap<String, EntryWithPosition<GeneratedType>>,
     next_position: u64,
     known_type_names: HashMap<String, String>,
+}
+
+impl Into<Vec<GeneratedType>> for Generator {
+    fn into(self) -> Vec<GeneratedType> {
+        let mut types: Vec<EntryWithPosition<GeneratedType>> =
+            self.types.into_iter().map(|(_, value)| value).collect();
+
+        types.sort();
+
+        types
+            .into_iter()
+            .map(
+                |EntryWithPosition {
+                     payload,
+                     position: _,
+                 }| payload,
+            )
+            .collect()
+    }
+}
+
+impl Into<TokenStream> for Generator {
+    fn into(self) -> TokenStream {
+        let types: Vec<GeneratedType> = self.into();
+
+        let tokens: Vec<TokenStream> = types.into_iter().map(|x| x.into()).collect();
+
+        quote! {
+            use serde_json::Value;
+            use std::collections::BTreeMap;
+            #(#tokens)*
+        }
+    }
 }
 
 impl Generator {
@@ -276,21 +311,6 @@ impl Generator {
             DataType::Any => String::from("Value"),
         }
     }
-
-    pub fn serialize(&self) -> String {
-        let mut result = String::from("");
-
-        result.push_str("use serde_json::Value;\n");
-        result.push_str("use std::collections::BTreeMap;\n");
-
-        let mut types: Vec<&EntryWithPosition<GeneratedType>> = self.types.values().collect();
-        types.sort();
-        let types: Vec<String> = types.into_iter().map(|x| x.payload.serialize()).collect();
-        result.push_str(&types.join("\n\n"));
-        result.push_str("\n");
-
-        result
-    }
 }
 
 #[cfg(test)]
@@ -301,6 +321,7 @@ mod generator_tests {
     use crate::parser::{
         AllOf, AnyOf, DataType, Object, ObjectProperty, OneOf, PrimitiveType, Ref, Root,
     };
+    use proc_macro2::TokenStream;
     use std::collections::HashMap;
     use std::path::Path;
     use std::rc::Rc;
@@ -344,102 +365,22 @@ mod generator_tests {
     }
 
     #[test]
-    fn should_serialize_type_with_derive() {
-        let t = GeneratedType {
-            src: String::from(""),
-            name: String::from(""),
-            properties: Vec::new(),
-        };
-
-        assert_eq!(
-            t.serialize()
-                .contains("#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]"),
-            true
-        )
-    }
-
-    #[test]
-    fn should_serialize_type_with_src() {
-        let t = GeneratedType {
-            src: String::from("foo"),
-            name: String::from(""),
-            properties: Vec::new(),
-        };
-
-        assert_eq!(t.serialize().contains("from foo"), true)
-    }
-
-    #[test]
-    fn should_serialize_type_with_struct() {
-        let t = GeneratedType {
-            src: String::from(""),
-            name: String::from("Foo"),
-            properties: Vec::new(),
-        };
-
-        assert_eq!(t.serialize().contains("struct Foo"), true)
-    }
-
-    #[test]
-    fn should_serialize_type_with_properties() {
-        let t = GeneratedType {
-            src: String::from(""),
-            name: String::from(""),
-            properties: vec![GeneratedProperty {
-                name: String::from("foo"),
-                property_type: String::from("Obsidian"),
-                serde_options: SerdeOptions { rename: None },
-            }],
-        };
-
-        assert_eq!(t.serialize().contains("foo: Obsidian"), true)
-    }
-
-    #[test]
-    fn should_serialize_property_with_name() {
-        let property = GeneratedProperty {
-            name: String::from("foo"),
-            property_type: String::from("Obsidian"),
-            serde_options: SerdeOptions { rename: None },
-        };
-
-        assert_eq!(property.serialize().contains("pub foo: Obsidian"), true)
-    }
-
-    #[test]
-    fn should_serialize_property_with_rename() {
-        let property = GeneratedProperty {
-            name: String::from(""),
-            property_type: String::from(""),
-            serde_options: SerdeOptions {
-                rename: Some(String::from("foo")),
-            },
-        };
-
-        assert_eq!(
-            property.serialize().contains("#[serde(rename = \"foo\")]"),
-            true
-        )
-    }
-
-    #[test]
     fn should_serialize_with_serde_json_import() {
         let generator = Generator::new();
+        let tokens: TokenStream = generator.into();
 
-        assert_eq!(
-            generator.serialize().contains("use serde_json::Value"),
-            true
-        )
+        assert_eq!(tokens.to_string().contains("use serde_json :: Value"), true)
     }
 
     #[test]
     fn should_serialize_with_btree_import() {
         let generator = Generator::new();
+        let tokens: TokenStream = generator.into();
 
         assert_eq!(
-            generator
-                .serialize()
-                .contains("use std::collections::BTreeMap"),
+            tokens
+                .to_string()
+                .contains("use std :: collections :: BTreeMap"),
             true
         )
     }
@@ -594,14 +535,18 @@ mod generator_tests {
     }
 
     fn object_with_property() -> Object {
+        object_with_custom_property(ObjectProperty {
+            name: String::from("awesome property"),
+            required: false,
+            data_type: Rc::new(DataType::Any),
+        })
+    }
+
+    fn object_with_custom_property(property: ObjectProperty) -> Object {
         Object {
             src: String::from("wrong src"),
             name: String::from("awesome foo"),
-            properties: vec![ObjectProperty {
-                name: String::from("awesome property"),
-                required: false,
-                data_type: Rc::new(DataType::Any),
-            }],
+            properties: vec![property],
         }
     }
 
@@ -970,6 +915,51 @@ mod generator_tests {
                     properties: vec![GeneratedProperty {
                         name: String::from("foo"),
                         serde_options: SerdeOptions { rename: None },
+                        property_type: String::from("Value")
+                    }]
+                }
+            ]
+        );
+    }
+
+    #[test]
+    fn should_convert_into_a_sorted_type_list() {
+        let mut generator = Generator::new();
+
+        add_type(
+            &mut generator,
+            DataType::Object(object_with_custom_property(ObjectProperty {
+                name: String::from("first property"),
+                required: false,
+                data_type: Rc::new(DataType::Object(object_with_property())),
+            })),
+            true,
+        );
+
+        let types: Vec<GeneratedType> = generator.into();
+
+        assert_eq!(
+            types,
+            vec![
+                GeneratedType {
+                    src: String::from(""),
+                    name: String::from("AwesomeFoo"),
+                    properties: vec![GeneratedProperty {
+                        name: String::from("first_property"),
+                        serde_options: SerdeOptions {
+                            rename: Some(String::from("first property"))
+                        },
+                        property_type: String::from("Option<AwesomeFoo1>")
+                    }]
+                },
+                GeneratedType {
+                    src: String::from("wrong src"),
+                    name: String::from("AwesomeFoo1"),
+                    properties: vec![GeneratedProperty {
+                        name: String::from("awesome_property"),
+                        serde_options: SerdeOptions {
+                            rename: Some(String::from("awesome property"))
+                        },
                         property_type: String::from("Value")
                     }]
                 }
