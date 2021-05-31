@@ -20,10 +20,13 @@ mod sanitizer;
 mod schema;
 
 pub fn generate(path: &Path) -> String {
+    generate_token_stream(path).to_string()
+}
+
+pub fn generate_token_stream(path: &Path) -> TokenStream {
     let mut generator = Generator::new();
     generator.add_file(path);
-    let tokens: TokenStream = generator.into();
-    tokens.to_string()
+    generator.into()
 }
 
 #[cfg(test)]
