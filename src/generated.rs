@@ -31,7 +31,7 @@ impl Into<TokenStream> for GeneratedType {
         quote! {
             #comment
             #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
-            struct #name {
+            pub struct #name {
                 #(#properties),*
             }
         }
@@ -104,7 +104,7 @@ mod generated_tests {
 
         assert_eq!(
             tokens.to_string(),
-            String::from("# [doc = \"Generated from nirvana\"] # [derive (Clone , PartialEq , Debug , Deserialize , Serialize)] struct new_name { # [serde (rename = \"original name\")] pub new_name : String , # [serde (rename = \"original name\")] pub new_name : String }")
+            String::from("# [doc = \"Generated from nirvana\"] # [derive (Clone , PartialEq , Debug , Deserialize , Serialize)] pub struct new_name { # [serde (rename = \"original name\")] pub new_name : String , # [serde (rename = \"original name\")] pub new_name : String }")
         )
     }
 

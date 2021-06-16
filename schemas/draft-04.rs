@@ -3,7 +3,7 @@ use serde_json::Value;
 use std::collections::BTreeMap;
 #[doc = "Generated from schemas/draft-04.json"]
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
-struct Unknown {
+pub struct Unknown {
     #[serde(rename = "$schema")]
     pub dollar_schema: Option<String>,
     #[serde(rename = "additionalItems")]
