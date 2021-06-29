@@ -1,6 +1,6 @@
 [package]
 name = "jsonschema_code_generator"
-version = "0.2.1"
+version = "1.0.0"
 authors = ["Tim Hellhake"]
 edition = "2018"
 description = "Crate for generating rust types from JSON schemas"
