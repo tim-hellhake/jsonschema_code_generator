@@ -258,7 +258,7 @@ impl Generator {
             DataType::Map(data_type) => {
                 format!(
                     "BTreeMap<String, {}>",
-                    self.add_type(base_path, root, None, data_type, true, Vec::new(),)
+                    self.add_type(base_path, root, None, data_type, true, Vec::new())
                 )
             }
             DataType::Ref(Ref { ref_path }) => {
@@ -408,8 +408,8 @@ mod generator_tests {
                             rename: Some(String::from("awesome property")),
                             skip_serializing_if: Some(String::from("Option::is_none")),
                         },
-                    }]
-                }
+                    }],
+                },
             })
         )
     }
@@ -781,8 +781,8 @@ mod generator_tests {
                             rename: None,
                             skip_serializing_if: Some(String::from("Option::is_none")),
                         },
-                        property_type: String::from("Option<B>")
-                    }]
+                        property_type: String::from("Option<B>"),
+                    }],
                 },
                 GeneratedType {
                     src: String::from("src/examples/generator/loop1.schema.json#/definitions/b"),
@@ -791,10 +791,10 @@ mod generator_tests {
                         name: String::from("c"),
                         serde_options: SerdeOptions {
                             rename: None,
-                            skip_serializing_if: Some(String::from("Option::is_none"))
+                            skip_serializing_if: Some(String::from("Option::is_none")),
                         },
-                        property_type: String::from("Option<C>")
-                    }]
+                        property_type: String::from("Option<C>"),
+                    }],
                 },
                 GeneratedType {
                     src: String::from("src/examples/generator/loop2.schema.json#/definitions/c"),
@@ -805,8 +805,8 @@ mod generator_tests {
                             rename: None,
                             skip_serializing_if: Some(String::from("Option::is_none")),
                         },
-                        property_type: String::from("Option<Box<B>>")
-                    }]
+                        property_type: String::from("Option<Box<B>>"),
+                    }],
                 }
             ]
         );
@@ -842,7 +842,7 @@ mod generator_tests {
                                 rename: None,
                                 skip_serializing_if: Some(String::from("Option::is_none")),
                             },
-                            property_type: String::from("Option<C>")
+                            property_type: String::from("Option<C>"),
                         },
                         GeneratedProperty {
                             name: String::from("b"),
@@ -850,9 +850,9 @@ mod generator_tests {
                                 rename: None,
                                 skip_serializing_if: Some(String::from("Option::is_none")),
                             },
-                            property_type: String::from("Option<C>")
+                            property_type: String::from("Option<C>"),
                         }
-                    ]
+                    ],
                 },
                 GeneratedType {
                     src: String::from(format!("{}#/definitions/c", file)),
@@ -864,7 +864,7 @@ mod generator_tests {
                             skip_serializing_if: Some(String::from("Option::is_none")),
                         },
                         property_type: String::from("Option<Value>"),
-                    }]
+                    }],
                 }
             ]
         );
@@ -900,7 +900,7 @@ mod generator_tests {
                                 rename: None,
                                 skip_serializing_if: Some(String::from("Option::is_none")),
                             },
-                            property_type: String::from("Option<A>")
+                            property_type: String::from("Option<A>"),
                         },
                         GeneratedProperty {
                             name: String::from("b"),
@@ -908,7 +908,7 @@ mod generator_tests {
                                 rename: None,
                                 skip_serializing_if: Some(String::from("Option::is_none")),
                             },
-                            property_type: String::from("Option<A1>")
+                            property_type: String::from("Option<A1>"),
                         },
                         GeneratedProperty {
                             name: String::from("c"),
@@ -916,9 +916,9 @@ mod generator_tests {
                                 rename: None,
                                 skip_serializing_if: Some(String::from("Option::is_none")),
                             },
-                            property_type: String::from("Option<A2>")
+                            property_type: String::from("Option<A2>"),
                         }
-                    ]
+                    ],
                 },
                 GeneratedType {
                     src: String::from(format!("{}/properties/a", file)),
@@ -930,7 +930,7 @@ mod generator_tests {
                             skip_serializing_if: Some(String::from("Option::is_none")),
                         },
                         property_type: String::from("Option<Value>"),
-                    }]
+                    }],
                 },
                 GeneratedType {
                     src: String::from(format!("{}/properties/b", file)),
@@ -942,7 +942,7 @@ mod generator_tests {
                             skip_serializing_if: Some(String::from("Option::is_none")),
                         },
                         property_type: String::from("Option<Value>"),
-                    }]
+                    }],
                 },
                 GeneratedType {
                     src: String::from(format!("{}/properties/c", file)),
@@ -954,7 +954,7 @@ mod generator_tests {
                             skip_serializing_if: Some(String::from("Option::is_none")),
                         },
                         property_type: String::from("Option<Value>"),
-                    }]
+                    }],
                 }
             ]
         );
@@ -988,8 +988,8 @@ mod generator_tests {
                             rename: Some(String::from("first property")),
                             skip_serializing_if: Some(String::from("Option::is_none")),
                         },
-                        property_type: String::from("Option<AwesomeFoo1>")
-                    }]
+                        property_type: String::from("Option<AwesomeFoo1>"),
+                    }],
                 },
                 GeneratedType {
                     src: String::from("wrong src"),
@@ -1001,7 +1001,7 @@ mod generator_tests {
                             skip_serializing_if: Some(String::from("Option::is_none")),
                         },
                         property_type: String::from("Option<Value>"),
-                    }]
+                    }],
                 }
             ]
         );

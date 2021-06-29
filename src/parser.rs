@@ -408,7 +408,7 @@ mod parser_tests {
                 vec![property(
                     String::from("subProperty"),
                     primitive_type(PrimitiveType::String),
-                )]
+                )],
             ))
         );
     }
@@ -424,7 +424,7 @@ mod parser_tests {
                 vec![property(
                     String::from("property"),
                     primitive_type(PrimitiveType::String),
-                )]
+                )],
             )
         );
     }
@@ -472,13 +472,13 @@ mod parser_tests {
                     String::from("someProperty"),
                     DataType::Object(Object {
                         src: String::from("src/examples/parser/object.nested.property.name.fallback.schema.json/properties/someProperty"),
-                        name:String::from( "someProperty"),
+                        name: String::from("someProperty"),
                         properties: vec![property(
                             String::from("property"),
                             primitive_type(PrimitiveType::String),
                         )],
                     }),
-                )]
+                )],
             )
         );
     }
@@ -495,7 +495,7 @@ mod parser_tests {
                     name: String::from("property"),
                     required: true,
                     data_type: Rc::new(primitive_type(PrimitiveType::String)),
-                }]
+                }],
             )
         );
     }
@@ -611,7 +611,7 @@ mod parser_tests {
                         data_type: Rc::new(primitive_type(PrimitiveType::String)),
                     }],
                 }),
-                DataType::PrimitiveType(PrimitiveType::String,)
+                DataType::PrimitiveType(PrimitiveType::String)
             ])
         );
     }
