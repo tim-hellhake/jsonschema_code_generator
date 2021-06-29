@@ -203,6 +203,12 @@ impl Generator {
             Some(name.clone())
         };
 
+        let skip_serializing_if = if *required {
+            None
+        } else {
+            Some(String::from("Option::is_none"))
+        };
+
         GeneratedProperty {
             name: property_name,
             property_type: self.add_type(
@@ -213,7 +219,10 @@ impl Generator {
                 required.clone(),
                 visited_objects,
             ),
-            serde_options: SerdeOptions { rename },
+            serde_options: SerdeOptions {
+                rename,
+                skip_serializing_if,
+            },
         }
     }
 
@@ -396,7 +405,8 @@ mod generator_tests {
                         name: String::from("awesome_property"),
                         property_type: String::from("Option<Value>"),
                         serde_options: SerdeOptions {
-                            rename: Some(String::from("awesome property"))
+                            rename: Some(String::from("awesome property")),
+                            skip_serializing_if: Some(String::from("Option::is_none")),
                         },
                     }]
                 }
@@ -767,7 +777,10 @@ mod generator_tests {
                     name: String::from("Loop"),
                     properties: vec![GeneratedProperty {
                         name: String::from("a"),
-                        serde_options: SerdeOptions { rename: None },
+                        serde_options: SerdeOptions {
+                            rename: None,
+                            skip_serializing_if: Some(String::from("Option::is_none")),
+                        },
                         property_type: String::from("Option<B>")
                     }]
                 },
@@ -776,7 +789,10 @@ mod generator_tests {
                     name: String::from("B"),
                     properties: vec![GeneratedProperty {
                         name: String::from("c"),
-                        serde_options: SerdeOptions { rename: None },
+                        serde_options: SerdeOptions {
+                            rename: None,
+                            skip_serializing_if: Some(String::from("Option::is_none"))
+                        },
                         property_type: String::from("Option<C>")
                     }]
                 },
@@ -785,7 +801,10 @@ mod generator_tests {
                     name: String::from("C"),
                     properties: vec![GeneratedProperty {
                         name: String::from("b"),
-                        serde_options: SerdeOptions { rename: None },
+                        serde_options: SerdeOptions {
+                            rename: None,
+                            skip_serializing_if: Some(String::from("Option::is_none")),
+                        },
                         property_type: String::from("Option<Box<B>>")
                     }]
                 }
@@ -819,12 +838,18 @@ mod generator_tests {
                     properties: vec![
                         GeneratedProperty {
                             name: String::from("a"),
-                            serde_options: SerdeOptions { rename: None },
+                            serde_options: SerdeOptions {
+                                rename: None,
+                                skip_serializing_if: Some(String::from("Option::is_none")),
+                            },
                             property_type: String::from("Option<C>")
                         },
                         GeneratedProperty {
                             name: String::from("b"),
-                            serde_options: SerdeOptions { rename: None },
+                            serde_options: SerdeOptions {
+                                rename: None,
+                                skip_serializing_if: Some(String::from("Option::is_none")),
+                            },
                             property_type: String::from("Option<C>")
                         }
                     ]
@@ -834,7 +859,10 @@ mod generator_tests {
                     name: String::from("C"),
                     properties: vec![GeneratedProperty {
                         name: String::from("foo"),
-                        serde_options: SerdeOptions { rename: None },
+                        serde_options: SerdeOptions {
+                            rename: None,
+                            skip_serializing_if: Some(String::from("Option::is_none")),
+                        },
                         property_type: String::from("Option<Value>"),
                     }]
                 }
@@ -868,17 +896,26 @@ mod generator_tests {
                     properties: vec![
                         GeneratedProperty {
                             name: String::from("a"),
-                            serde_options: SerdeOptions { rename: None },
+                            serde_options: SerdeOptions {
+                                rename: None,
+                                skip_serializing_if: Some(String::from("Option::is_none")),
+                            },
                             property_type: String::from("Option<A>")
                         },
                         GeneratedProperty {
                             name: String::from("b"),
-                            serde_options: SerdeOptions { rename: None },
+                            serde_options: SerdeOptions {
+                                rename: None,
+                                skip_serializing_if: Some(String::from("Option::is_none")),
+                            },
                             property_type: String::from("Option<A1>")
                         },
                         GeneratedProperty {
                             name: String::from("c"),
-                            serde_options: SerdeOptions { rename: None },
+                            serde_options: SerdeOptions {
+                                rename: None,
+                                skip_serializing_if: Some(String::from("Option::is_none")),
+                            },
                             property_type: String::from("Option<A2>")
                         }
                     ]
@@ -888,7 +925,10 @@ mod generator_tests {
                     name: String::from("A"),
                     properties: vec![GeneratedProperty {
                         name: String::from("foo"),
-                        serde_options: SerdeOptions { rename: None },
+                        serde_options: SerdeOptions {
+                            rename: None,
+                            skip_serializing_if: Some(String::from("Option::is_none")),
+                        },
                         property_type: String::from("Option<Value>"),
                     }]
                 },
@@ -897,7 +937,10 @@ mod generator_tests {
                     name: String::from("A1"),
                     properties: vec![GeneratedProperty {
                         name: String::from("foo"),
-                        serde_options: SerdeOptions { rename: None },
+                        serde_options: SerdeOptions {
+                            rename: None,
+                            skip_serializing_if: Some(String::from("Option::is_none")),
+                        },
                         property_type: String::from("Option<Value>"),
                     }]
                 },
@@ -906,7 +949,10 @@ mod generator_tests {
                     name: String::from("A2"),
                     properties: vec![GeneratedProperty {
                         name: String::from("foo"),
-                        serde_options: SerdeOptions { rename: None },
+                        serde_options: SerdeOptions {
+                            rename: None,
+                            skip_serializing_if: Some(String::from("Option::is_none")),
+                        },
                         property_type: String::from("Option<Value>"),
                     }]
                 }
@@ -939,7 +985,8 @@ mod generator_tests {
                     properties: vec![GeneratedProperty {
                         name: String::from("first_property"),
                         serde_options: SerdeOptions {
-                            rename: Some(String::from("first property"))
+                            rename: Some(String::from("first property")),
+                            skip_serializing_if: Some(String::from("Option::is_none")),
                         },
                         property_type: String::from("Option<AwesomeFoo1>")
                     }]
@@ -950,7 +997,8 @@ mod generator_tests {
                     properties: vec![GeneratedProperty {
                         name: String::from("awesome_property"),
                         serde_options: SerdeOptions {
-                            rename: Some(String::from("awesome property"))
+                            rename: Some(String::from("awesome property")),
+                            skip_serializing_if: Some(String::from("Option::is_none")),
                         },
                         property_type: String::from("Option<Value>"),
                     }]

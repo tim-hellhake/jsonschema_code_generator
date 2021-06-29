@@ -53,13 +53,24 @@ impl Into<TokenStream> for GeneratedProperty {
             serde_options,
         } = self;
 
-        let attributes: Vec<TokenStream> = match serde_options.rename {
+        let mut attributes: Vec<TokenStream> = Vec::new();
+
+        match serde_options.rename {
             Some(name) => {
-                vec![quote! {
+                attributes.push(quote! {
                     #[serde(rename = #name)]
-                }]
+                });
             }
-            None => Vec::new(),
+            None => {}
+        };
+
+        match serde_options.skip_serializing_if {
+            Some(option) => {
+                attributes.push(quote! {
+                    #[serde(skip_serializing_if = #option)]
+                });
+            }
+            None => {}
         };
 
         let name = proc_macro2::Ident::new(&name, Span::call_site());
@@ -75,6 +86,7 @@ impl Into<TokenStream> for GeneratedProperty {
 #[derive(Eq, PartialEq, Debug)]
 pub struct SerdeOptions {
     pub rename: Option<String>,
+    pub skip_serializing_if: Option<String>,
 }
 
 #[cfg(test)]
@@ -114,6 +126,7 @@ mod generated_tests {
             property_type: String::from("String"),
             serde_options: SerdeOptions {
                 rename: Some(String::from("original name")),
+                skip_serializing_if: None,
             },
         }
     }
