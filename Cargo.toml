@@ -11,9 +11,9 @@ license = "MPL-2.0"
 keywords = ["json", "schema", "code", "generator"]
 
 [dependencies]
-serde = { version = "1.0.125", features = ["derive"] }
-serde_repr = "0.1.6"
+serde = { version = "1.0.126", features = ["derive"] }
+serde_repr = "0.1.7"
 serde_json = "1.0.64"
 convert_case = "0.4.0"
 proc-macro2 = "1.0.27"
-quote = "1.0"
+quote = "1.0.9"
