@@ -226,40 +226,26 @@ impl Generator {
         required: bool,
         visited_objects: Vec<String>,
     ) -> String {
-        match data_type {
-            DataType::PrimitiveType(primitive_type) => {
-                let type_name = match primitive_type {
-                    PrimitiveType::Null => "Value",
-                    PrimitiveType::Boolean => "bool",
-                    PrimitiveType::Integer => "i64",
-                    PrimitiveType::Number => "f64",
-                    PrimitiveType::String => "String",
-                };
-
-                match required {
-                    true => String::from(type_name),
-                    false => format!("Option<{}>", type_name),
-                }
-            }
+        let type_name = match data_type {
+            DataType::PrimitiveType(primitive_type) => match primitive_type {
+                PrimitiveType::Null => String::from("Value"),
+                PrimitiveType::Boolean => String::from("bool"),
+                PrimitiveType::Integer => String::from("i64"),
+                PrimitiveType::Number => String::from("f64"),
+                PrimitiveType::String => String::from("String"),
+            },
             DataType::Array(items) => {
                 let type_name =
                     self.add_type(base_path, root, src_override, &*items, true, Vec::new());
                 format!("Vec<{}>", type_name)
             }
-            DataType::Object(object) => {
-                let type_name = self.add_object(
-                    base_path,
-                    root,
-                    src_override.unwrap_or(object.src.to_string()),
-                    object.clone(),
-                    visited_objects,
-                );
-
-                match required {
-                    true => String::from(type_name),
-                    false => format!("Option<{}>", type_name),
-                }
-            }
+            DataType::Object(object) => self.add_object(
+                base_path,
+                root,
+                src_override.unwrap_or(object.src.to_string()),
+                object.clone(),
+                visited_objects,
+            ),
             DataType::Map(data_type) => {
                 format!(
                     "BTreeMap<String, {}>",
@@ -284,7 +270,7 @@ impl Generator {
                     root,
                     Some(src),
                     &data_type,
-                    required,
+                    true,
                     visited_objects,
                 )
             }
@@ -310,6 +296,11 @@ impl Generator {
                 String::from("Value")
             }
             DataType::Any => String::from("Value"),
+        };
+
+        match required {
+            true => String::from(type_name),
+            false => format!("Option<{}>", type_name),
         }
     }
 }
@@ -403,7 +394,7 @@ mod generator_tests {
                     name: String::from("AwesomeFoo"),
                     properties: vec![GeneratedProperty {
                         name: String::from("awesome_property"),
-                        property_type: String::from("Value"),
+                        property_type: String::from("Option<Value>"),
                         serde_options: SerdeOptions {
                             rename: Some(String::from("awesome property"))
                         },
@@ -844,7 +835,7 @@ mod generator_tests {
                     properties: vec![GeneratedProperty {
                         name: String::from("foo"),
                         serde_options: SerdeOptions { rename: None },
-                        property_type: String::from("Value")
+                        property_type: String::from("Option<Value>"),
                     }]
                 }
             ]
@@ -898,7 +889,7 @@ mod generator_tests {
                     properties: vec![GeneratedProperty {
                         name: String::from("foo"),
                         serde_options: SerdeOptions { rename: None },
-                        property_type: String::from("Value")
+                        property_type: String::from("Option<Value>"),
                     }]
                 },
                 GeneratedType {
@@ -907,7 +898,7 @@ mod generator_tests {
                     properties: vec![GeneratedProperty {
                         name: String::from("foo"),
                         serde_options: SerdeOptions { rename: None },
-                        property_type: String::from("Value")
+                        property_type: String::from("Option<Value>"),
                     }]
                 },
                 GeneratedType {
@@ -916,7 +907,7 @@ mod generator_tests {
                     properties: vec![GeneratedProperty {
                         name: String::from("foo"),
                         serde_options: SerdeOptions { rename: None },
-                        property_type: String::from("Value")
+                        property_type: String::from("Option<Value>"),
                     }]
                 }
             ]
@@ -961,7 +952,7 @@ mod generator_tests {
                         serde_options: SerdeOptions {
                             rename: Some(String::from("awesome property"))
                         },
-                        property_type: String::from("Value")
+                        property_type: String::from("Option<Value>"),
                     }]
                 }
             ]

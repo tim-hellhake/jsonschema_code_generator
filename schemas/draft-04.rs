@@ -7,26 +7,26 @@ pub struct Unknown {
     #[serde(rename = "$schema")]
     pub dollar_schema: Option<String>,
     #[serde(rename = "additionalItems")]
-    pub additional_items: Value,
+    pub additional_items: Option<Value>,
     #[serde(rename = "additionalProperties")]
-    pub additional_properties: Value,
+    pub additional_properties: Option<Value>,
     #[serde(rename = "allOf")]
-    pub all_of: Vec<Unknown>,
+    pub all_of: Option<Vec<Unknown>>,
     #[serde(rename = "anyOf")]
-    pub any_of: Vec<Unknown>,
-    pub default: Value,
-    pub definitions: BTreeMap<String, Value>,
-    pub dependencies: BTreeMap<String, Value>,
+    pub any_of: Option<Vec<Unknown>>,
+    pub default: Option<Value>,
+    pub definitions: Option<BTreeMap<String, Value>>,
+    pub dependencies: Option<BTreeMap<String, Value>>,
     pub description: Option<String>,
     #[serde(rename = "enum")]
-    pub enum_: Vec<Value>,
+    pub enum_: Option<Vec<Value>>,
     #[serde(rename = "exclusiveMaximum")]
     pub exclusive_maximum: Option<bool>,
     #[serde(rename = "exclusiveMinimum")]
     pub exclusive_minimum: Option<bool>,
     pub format: Option<String>,
     pub id: Option<String>,
-    pub items: Value,
+    pub items: Option<Value>,
     #[serde(rename = "maxItems")]
     pub max_items: Option<i64>,
     #[serde(rename = "maxLength")]
@@ -35,25 +35,25 @@ pub struct Unknown {
     pub max_properties: Option<i64>,
     pub maximum: Option<f64>,
     #[serde(rename = "minItems")]
-    pub min_items: Value,
+    pub min_items: Option<Value>,
     #[serde(rename = "minLength")]
-    pub min_length: Value,
+    pub min_length: Option<Value>,
     #[serde(rename = "minProperties")]
-    pub min_properties: Value,
+    pub min_properties: Option<Value>,
     pub minimum: Option<f64>,
     #[serde(rename = "multipleOf")]
     pub multiple_of: Option<f64>,
     pub not: Option<Box<Unknown>>,
     #[serde(rename = "oneOf")]
-    pub one_of: Vec<Unknown>,
+    pub one_of: Option<Vec<Unknown>>,
     pub pattern: Option<String>,
     #[serde(rename = "patternProperties")]
-    pub pattern_properties: BTreeMap<String, Value>,
-    pub properties: BTreeMap<String, Value>,
-    pub required: Vec<String>,
+    pub pattern_properties: Option<BTreeMap<String, Value>>,
+    pub properties: Option<BTreeMap<String, Value>>,
+    pub required: Option<Vec<String>>,
     pub title: Option<String>,
     #[serde(rename = "type")]
-    pub type_: Value,
+    pub type_: Option<Value>,
     #[serde(rename = "uniqueItems")]
     pub unique_items: Option<bool>,
 }
